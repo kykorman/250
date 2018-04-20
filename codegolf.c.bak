@@ -1,0 +1,120 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+typedef struct box *link;
+
+struct box{
+	int acct;
+	double bal;
+	link next;
+};
+
+link getLocAcct(link L,int x){
+	link mov=L;
+	while(mov!=NULL){
+		if(mov->acct==x)
+			return mov;
+		mov=mov->next;
+	}
+return NULL;}
+
+
+link getLocBal(link L,double x){
+	link mov=L;
+	while(mov!=NULL){
+		if(mov->bal==x)
+			return mov;
+		mov=mov->next;
+	}
+return NULL;}
+link removeThisOne(link L,link ptr){
+	if(ptr==L){
+		L=L->next;
+		free(ptr);
+	}else{
+		link mov=L;
+		while(mov->next!=ptr)
+			mov=mov->next;
+
+		mov->next=ptr->next;
+		free(ptr);
+	}
+	
+
+	return L;
+}
+double maxVal(link L){
+	link mov=L;
+	double max=mov->bal;
+	while(mov!=NULL){
+		if(max<mov->bal)
+			max=mov->bal;
+		mov=mov->next;
+	}
+
+return max;}
+
+link maxLoc(link L){
+	double max=maxVal(L);
+	link tmp=getLocBal(L,max);
+return tmp;}
+
+link make(struct box tmp){
+	link newBox=malloc(sizeof(struct box));
+	newBox->acct=tmp.acct;
+	newBox->bal=tmp.bal;
+	newBox->next=NULL;
+
+	return newBox;
+}
+
+link insertFront(link L, struct box tmp){
+	link newBox=make(tmp);
+	if(L==NULL){
+		L=newBox;			
+	}
+	else{
+		newBox->next=L;
+		L=newBox;
+	}
+return L;}
+
+void printInOrder(link L){
+
+	while(L!=NULL){
+		link mxLoc=maxLoc(L);
+
+		printf("#%d:$%.2lf\n",mxLoc->acct,mxLoc->bal);
+		L=removeThisOne(L,mxLoc);
+		
+	}
+
+}
+
+int main(){
+	link L=NULL;
+	struct box tmp;
+	char jnk;
+	while(scanf("%c%d",&jnk,&tmp.acct)!=EOF){
+		char tmpC;	
+		scanf("%c%c",&tmpC,&jnk);
+
+		if(tmpC==':'){
+			scanf("%lf%c",&tmp.bal,&jnk);
+			L=insertFront(L,tmp);
+		}else{
+			int payTo;
+			double amt;
+			scanf("%c%d%c%c%lf%c",&jnk,&payTo,&jnk,&jnk,&amt,&jnk);
+
+			link payer=getLocAcct(L,tmp.acct);
+			link payee=getLocAcct(L,payTo);
+
+			payer->bal=payer->bal-amt;
+			payee->bal=payee->bal+amt;		
+		}
+	}
+		printInOrder(L);
+
+
+return 0;}
